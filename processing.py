@@ -24,7 +24,7 @@ def remove_stop_words(t, st):
 def filter_verbs_nouns(s):
     train = state_union.raw("2005-GWBush.txt")
     # sample_text = open("corpus/1.txt", "r").read()
-    print(s)
+    # print(s)
     cust = PunktSentenceTokenizer(train)
     tok = cust.tokenize(s)
 
@@ -45,8 +45,8 @@ def filter_verbs_nouns(s):
             else:
                 nouns.append(c[0])
 
-            print(c[0])
-            print(c)
+            # print(c[0])
+            # print(c)
 
     return [verbs, nouns]
 
@@ -143,10 +143,10 @@ def build_vec_mod():
     stop_words = re.findall("\S+", content)
     # print(stop_words)
     # read files in corpus Folder
-    tokines = []  # contait all tokines for all docs
-    clean_data = []  # contain all tokines for current docs
+    tokines = []  # contait all terms for all docs
+    termsInAfile = []  # this contain all terms in current file without stop words
     diction = {}  # dictionary for all tokens
-    f1 = open("result.txt", "w")
+
     for x in range(1, 424):
         f = open("corpus/{}.txt".format(x), "r")
         contentAFile = f.read()
@@ -216,28 +216,31 @@ def build_vec_mod():
 
         ################################################################
 
-        tokenized_word = word_tokenize(contentAFile)
+        # tokenized_word = word_tokenize(contentAFile)
 
-        tokenized_word.extend(dates)
-        tokenized_word.extend(years)
-        tokenized_word.extend(emails)
-        tokenized_word.extend(phones)
+        # tokenized_word.extend(dates)
+        # tokenized_word.extend(years)
+        # tokenized_word.extend(emails)
+        # tokenized_word.extend(phones)
 
-        #وصلنا لهون باقي احذف أعدل الحكي يلي تحت
-        # remove stop words
-        for w in tokenized_word:
-            if w not in stop_words:
-                clean_data.append(w)
-                if w not in tokines:
-                    tokines.append(w)
+        termsInAfile.extend(verbs)
+        termsInAfile.extend(nounes)
+        termsInAfile.extend(years)
+        termsInAfile.extend(phones)
+        termsInAfile.extend(dates)
+        termsInAfile.extend(emails)
 
-        temp_dic = {}  # dictionary for one token
-        for y in clean_data:
-            temp_dic.update({y: (1 + math.log(clean_data.count(y), 10)).__round__(5)})
+        for w in termsInAfile:
+            if w not in tokines:
+                tokines.append(w)
+
+        temp_dic = {}  # dictionary for each term
+        for y in termsInAfile:
+            temp_dic.update({y: (1 + math.log(termsInAfile.count(y), 10)).__round__(5)})
 
         diction.update({x: temp_dic})
         print("document number : {} Done".format(x))
-        clean_data.clear()
+        termsInAfile.clear()
 
     # Extension of the previous diction in order to contain all terms
     # and show their repetition within the document
@@ -252,12 +255,13 @@ def build_vec_mod():
             else:
                 diction.get(a).update({y: temp_dic2[y]})
 
-    f1.write(str(diction))
-    f1.write("\n\n")
 
+    f1 = open("vector model.txt", "w")
+    f1.write(str(diction))
     f1.close()
-    # print(temp_vec)
-    # print("ffffffffffffffffffffffffffffffffffffffffffffff")
+
+    f2 = open("terms.txt", "w")
+    f2.write(str(tokines))
+    f2.close()
     print(len(tokines))
-    # print(clean_data)
-    # print(diction)
+
